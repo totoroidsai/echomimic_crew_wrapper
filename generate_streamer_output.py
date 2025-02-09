@@ -11,6 +11,8 @@ import subprocess
 import litellm
 search_tool = SerperDevTool()
 
+STREAMER_ID = 0
+
 llm = LLM(
     model="ollama/mistral",
     base_url="http://localhost:11434"
@@ -67,10 +69,11 @@ def chunk_text(text, chunk_size=2):
 def generate_audio(output):
     for i, chunk in enumerate(chunk_text(output.raw), start=1):
 
-        file = f"./audio_files/output_{i}.wav"
+        file = f"./audio_files/streamer_{STREAMER_ID}/output_{i}.wav"
         tts_output.tts_to_file(text=chunk, file_path=file)
         print(f"Audio saved as {file}")
-        Generate_Video(f"output_{i}.wav")
+        Generate_Video(f"stream_{STREAMER_ID}output_{i}.wav")
+        os.remove(file)
 
     return
 
@@ -97,11 +100,15 @@ def pick_random_model():
     print(tts_models[rand])
     return tts_models[rand] #random.choice(models) if models else None
 
-# load this streamers voice
-model_name = pick_random_model()  # You can change this model
-tts_output = tts("tts_models/en/ljspeech/vits") #.to("cuda")  # Use "cpu" if you don't have a GPU
+def create_new_streamer(streamer_id):
 
-# --- Create and Run the Crew ---
-crew = Crew(agents=[researcher,scriptwriter, tts_agent]
-            , tasks=[research_task,script_task, tts_task])
-crew.kickoff()
+    STREAMER_ID = streamer_id
+    
+    # load this streamers voice
+    model_name = pick_random_model()  # You can change this model
+    tts_output = tts("tts_models/en/ljspeech/vits") #.to("cuda")  # Use "cpu" if you don't have a GPU
+    
+    # --- Create and Run the Crew ---
+    crew = Crew(agents=[researcher,scriptwriter, tts_agent]
+                , tasks=[research_task,script_task, tts_task])
+    crew.kickoff()
