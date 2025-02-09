@@ -5,6 +5,7 @@ import requests
 from crewai import Agent, Task, Crew, LLM
 from crewai_tools import SerperDevTool
 import time
+from datetime import datetime
 import random
 from TTS.utils.manage import ModelManager
 import subprocess
@@ -72,7 +73,8 @@ def generate_audio(output):
         file = f"./audio_files/streamer_{STREAMER_ID}/output_{i}.wav"
         tts_output.tts_to_file(text=chunk, file_path=file)
         print(f"Audio saved as {file}")
-        Generate_Video(f"stream_{STREAMER_ID}output_{i}.wav")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        Generate_Video(f"streamer_{STREAMER_ID}/output_{timestamp}_{i}.wav")
         os.remove(file)
 
     return
