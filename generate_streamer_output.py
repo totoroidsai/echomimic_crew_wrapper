@@ -10,6 +10,11 @@ import random
 from TTS.utils.manage import ModelManager
 import subprocess
 import litellm
+from registry import WeightsTracker
+from datetime import datetime
+
+tracker = WeightsTracker()
+topic = ""
 search_tool = SerperDevTool()
 
 STREAMER_ID = 0
@@ -104,11 +109,23 @@ def pick_random_model():
 
 def create_new_streamer(streamer_id):
 
+    # Get weighted sample based on viewer_share
+    # top_streamer = tracker.weighted_choice()
+
     STREAMER_ID = streamer_id
     
     # load this streamers voice
     model_name = pick_random_model()  # You can change this model
     tts_output = tts("tts_models/en/ljspeech/vits") #.to("cuda")  # Use "cpu" if you don't have a GPU
+
+
+    tracker.append({
+        "streamer_id": streamer_id,
+        "voice_model": model_name,
+        "topic": topic,
+        "viewer_share": 0.0,
+        "timestamp": datetime.now().isoformat()
+    })
     
     # --- Create and Run the Crew ---
     crew = Crew(agents=[researcher,scriptwriter, tts_agent]
